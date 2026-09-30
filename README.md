@@ -6,7 +6,7 @@
 
 | 文件 / 目录 | 用途 |
 | --- | --- |
-| `HW-Template` | LaTeX 作业模板，文件名没有 `.tex` 扩展名，可直接编译 |
+| `HW-Template.tex` | LaTeX 作业模板 |
 | `Makefile` | 编译 PDF、清理中间文件 |
 | `build/` | 编译生成的 PDF 和中间文件 |
 
@@ -35,7 +35,7 @@ make distclean  # 清理中间文件和 PDF
 
 ### 1. 填写封面信息
 
-在 `HW-Template` 的 `Homework Details` 部分，修改以下命令最后一组大括号中的内容：
+在 `HW-Template.tex` 的 `Homework Details` 部分，修改以下命令最后一组大括号中的内容：
 
 ```latex
 \newcommand{\hmwkTitle}{Homework 1}
@@ -137,11 +137,11 @@ make distclean  # 清理中间文件和 PDF
 
 ```bash
 mkdir HW1
-cp HW-Template Makefile HW1/
+cp HW-Template.tex Makefile HW1/
 cd HW1
 ```
 
-编辑 `HW1/` 中的 `HW-Template`，填写个人信息、题目和答案。保留文件名 `HW-Template`，即可在 `HW1/` 下直接编译：
+编辑 `HW1/` 中的 `HW-Template.tex`，填写个人信息、题目和答案。保留文件名 `HW-Template.tex`，即可在 `HW1/` 下直接编译：
 
 ```bash
 make

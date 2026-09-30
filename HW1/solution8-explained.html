@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第八题解答检验与解释</title>
+<script>
+MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+  chtml: { scale: 1.05 }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  body {
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    max-width: 860px;
+    margin: 2rem auto;
+    padding: 0 1.5rem 4rem;
+    color: #1f2328;
+    line-height: 1.75;
+    background: #ffffff;
+  }
+  h1 {
+    font-size: 1.6rem;
+    border-bottom: 2px solid #d0d7de;
+    padding-bottom: 0.5rem;
+  }
+  h2 {
+    font-size: 1.25rem;
+    margin-top: 2.2rem;
+    color: #0550ae;
+  }
+  .verdict {
+    background: #dafbe1;
+    border-left: 4px solid #1a7f37;
+    padding: 0.8rem 1.2rem;
+    border-radius: 6px;
+    margin: 1.2rem 0;
+  }
+  .key {
+    background: #fff8c5;
+    border-left: 4px solid #d4a72c;
+    padding: 0.8rem 1.2rem;
+    border-radius: 6px;
+    margin: 1.2rem 0;
+  }
+  .final {
+    background: #ddf4ff;
+    border-left: 4px solid #0969da;
+    padding: 0.8rem 1.2rem;
+    border-radius: 6px;
+    margin: 1.2rem 0;
+  }
+  table {
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+  td, th {
+    border: 1px solid #d0d7de;
+    padding: 0.4rem 0.9rem;
+    text-align: center;
+  }
+  th { background: #f6f8fa; }
+  code {
+    background: #f6f8fa;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  .muted { color: #57606a; }
+</style>
+</head>
+<body>
+
+<h1>第八题解答检验与解释</h1>
+
+<div class="verdict">
+<strong>结论：解答是对的。</strong> 用 200 万次蒙特卡洛模拟验证：模拟的期望返回值 ≈ <strong>1.35906</strong>，与
+$e/2 \approx 1.35914$ 吻合。顺带一提，模拟的平均抽取次数 ≈ 2.7185，正好等于 $e$，这也是本题的经典伴生结论。
+</div>
+
+<h2>整体思路</h2>
+<p>程序每次抽 $U\sim\mathrm{Unif}(0,1)$ 累加，直到和超过 1。由于每次抽样独立同分布，<strong>未来只取决于当前的和 $x$</strong>，所以可以定义「价值函数」：</p>
+<div class="key">
+$$g(x) = \text{当前和为 } x \text{ 时，最终返回值的期望}$$
+<p style="margin:0.5rem 0 0 0;">答案就是 $g(0)$。整个解法是：<strong>一步展开 → 积分方程 → 求导变成微分方程 → 解出通解 → 用边界条件定常数</strong>。</p>
+</div>
+
+<h2>逐步解释</h2>
+
+<h3>① 积分方程（一步展开）</h3>
+<p>看下一次抽样 $U$：</p>
+<ul>
+  <li>若 $U \le 1-x$：新和为 $x+U$，还没超过 1，继续，期望变成 $g(x+U)$；</li>
+  <li>若 $U > 1-x$：新和 $x+U > 1$，立刻返回 $x+U$。</li>
+</ul>
+<p>由于 $U$ 的密度是 1，直接对 $u$ 积分（本质是全期望公式）：</p>
+$$g(x)=\int_0^{1-x}g(x+u)\,\mathrm{d}u+\int_{1-x}^1(x+u)\,\mathrm{d}u$$
+<p>第二个积分可以直接算出来：</p>
+$$\int_{1-x}^1(x+u)\,\mathrm{d}u = x + \frac{x^2}{2}$$
+<p>第一个积分换元 $v=x+u$ 后变成 $\int_x^1 g(v)\,\mathrm{d}v$，于是</p>
+$$g(x)=\int_x^1 g(v)\,\mathrm{d}v+x+\frac{x^2}{2}$$
+
+<h3>② 求导降阶成 ODE</h3>
+<p>两边对 $x$ 求导，由微积分基本定理 $\dfrac{\mathrm{d}}{\mathrm{d}x}\displaystyle\int_x^1 g(v)\,\mathrm{d}v = -g(x)$，得</p>
+$$g'(x) = -g(x) + 1 + x \quad\Longleftrightarrow\quad g'(x)+g(x)=1+x$$
+<p>积分方程里「$g$ 藏在积分号下」的困难，求一次导就消掉了。</p>
+
+<h3>③ 解一阶线性 ODE</h3>
+<p>乘积分因子 $e^x$：</p>
+$$(e^x g(x))' = e^x(1+x) = (xe^x)' \;\Rightarrow\; g(x) = x + Ce^{-x}$$
+
+<h3>④ 边界条件 $g(1)=\tfrac32$ —— 全篇最巧妙的一步</h3>
+<div class="key">
+<p>通解里有一个未知常数，需要边界信息。关键观察：循环条件是 $sum \le 1$（<strong>含等号</strong>），所以当和恰好等于 1 时程序<strong>还不会停</strong>，还要再抽一次；而任何 $U>0$ 都使和严格超过 1，故</p>
+$$g(1) = 1 + \mathrm{E}[U] = 1 + \frac12 = \frac32$$
+<p>代回通解：$1 + Ce^{-1} = \dfrac32 \Rightarrow C = \dfrac{e}{2}$。</p>
+</div>
+
+<h3>⑤ 收尾</h3>
+<p>程序从 $x=0$ 出发，所以</p>
+<div class="final">
+$$\mathrm{E}[\text{返回值}] = g(0) = 0 + \frac{e}{2} \approx 1.359$$
+</div>
+
+<h2>直觉与补充</h2>
+<ul>
+  <li><strong>为什么答案大于 1 且小于 2</strong>：最终和必然刚超过 1，但超出的部分（overshoot）平均约 0.359，所以期望是 $1 + 0.359$；又因为停止前的和 $\le 1$、最后加的一次 $&lt;1$，返回值恒在 $(1,2)$ 内。</li>
+  <li><strong>终止性</strong>：解答开头的论证（前 $m$ 次中至多一次大于 $\tfrac12$ 的概率是 $(m+1)2^{-m}\to 0$）说明程序几乎必然在有限步内停止，这保证了 $g$ 良定义且有限，也使后面求导合法。</li>
+  <li><strong>自洽性检查</strong>：把 $x=1$ 代回原积分方程也得 $g(1)=0+\tfrac32$，与边界条件一致，说明解没有矛盾。</li>
+  <li><strong>伴生经典结论</strong>：设 $N$ 为停止时抽取的次数，则 $\mathrm{P}(N&gt;n)=\mathrm{P}(S_n\le 1)=\tfrac1{n!}$，从而 $\mathrm{E}[N]=e$；模拟值 2.7185 与之吻合。</li>
+</ul>
+
+<p class="muted">模拟验证（Python，200 万次）：E[返回值] = 1.359062 vs e/2 = 1.359141；E[抽取次数] = 2.718467 vs e = 2.718282。</p>
+
+</body>
+</html>
